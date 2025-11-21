@@ -19,14 +19,14 @@ Praxis-BGM corresponds to the method described in:
 - Semi-supervised Bayesian transfer learning for Gaussian mixture models  
 - NGVI (VON algorithm) for fast, stable optimization  
 - Four classes of priors:
-  - Means `μ₀`
-  - Covariances `Σ₀`
-  - Structural adjacency masks `A` derived from pathway databases
-  - Mixing weights `θ₀`
+  - Means `μ` for each cluster
+  - Covariances `Σ` for each cluster (optional)
+  - Structural adjacency masks `A` derived from pathway databases (optional)
+  - Mixing weights `θ` (optional)
 - Structural sparsity masks `A` to encode pathway or network knowledge  
-- Mini-batch training 
+- Mini-batch training, efficient with n >> 10,000
 - Bayes factor–based feature importance scoring  
-- Compatible with high-dimensional omics (d > 5,000)
+- Compatible with high-dimensional omics (d > 1,000)
 
 ---
 
