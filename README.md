@@ -54,6 +54,14 @@ matplotlib
 For GPU acceleration, install the appropriate jaxlib from:
 https://github.com/google/jax#installation
 
+## Tutorial
+
+A complete walkthrough of Praxis-BGM is provided in the following notebook:
+
+[Praxis_BGM_Tutorial.ipynb](./Praxis_BGM_Tutorial.ipynb)
+
+This tutorial demonstrates the basic workflow, including simulation of overlapping GMM data, construction of source → target domain shift, empirical source priors, NGVI-based clustering with transferred priors, and benchmarking against QDA and unsupervised baselines using ARI.
+
 ## Citation
 
 If you use Praxis-BGM in your research, please cite:
