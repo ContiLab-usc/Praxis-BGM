@@ -37,6 +37,11 @@ Clone the repository and install locally:
 ```bash
 pip install -e .
 ```
+or install directly from this repo
+
+```bash
+pip install git+https://github.com/ContiLab-usc/Praxis-BGM.git
+```
 
 ## Requirements
 python >= 3.9
