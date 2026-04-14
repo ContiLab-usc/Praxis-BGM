@@ -1,75 +1,113 @@
 # Praxis-BGM
 
-## Prior-Augmented Bayesian Gaussian Mixture Model via Natural-Gradient Variational Inference
+## Updated installable layout for the latest Praxis algorithm
 
-Praxis-BGM is a **semi-supervised transfer-learning framework** for clustering high-dimensional omics, multi-omics, and single-cell data using **Bayesian Gaussian Mixture Models** with **Natural-Gradient Variational Inference (NGVI)**.
+This folder packages the newest `Praxis` algorithm in the installable
+`Praxis-BGM` repository structure. The core implementation now lives under
+`src/praxis_bgm/`, while tutorials and runnable examples stay at the repository
+root.
 
-This method enables incorporation of **cluster-specific prior information**—including means, covariances, sparsity masks, and mixing weights—from a labeled *source dataset* to guide clustering in an unlabeled *target dataset*. Praxis-BGM is implemented in **JAX**, providing GPU/TPU acceleration and numerically stable updates.
+The main user-facing class is:
 
-Praxis-BGM corresponds to the method described in:
+```python
+from praxis_bgm import Praxis_BGM
+```
 
-> **Qiran Jia, Jesse A. Goodrich, David V. Conti**  
-> *Clustering of Omic Data Using Semi-Supervised Transfer Learning for Gaussian Mixture Models via Natural-Gradient Variational Inference*.  
-> bioRxiv 2025.11.13.688299v2.
+## What's included
 
----
-
-## Features
-
-- Semi-supervised Bayesian transfer learning for Gaussian mixture models  
-- NGVI (VON algorithm) for fast, stable optimization  
-- Four classes of priors:
-  - Means `μ` for each cluster
-  - Covariances `Σ` for each cluster (optional)
-  - Structural adjacency masks `A` derived from pathway databases (optional)
-  - Mixing weights `θ` (optional)
-- Structural sparsity masks `A` to encode pathway or network knowledge  
-- Mini-batch training, efficient with n >> 10,000
-- Bayes factor–based feature importance scoring  
-- Compatible with high-dimensional omics (d > 1,000)
-
----
+- `src/praxis_bgm/core.py`: high-level `Praxis_BGM` model API
+- `src/praxis_bgm/utility.py`: numerical helpers and damped NGVI updates
+- `src/praxis_bgm/prior_utils.py`: source-to-target alignment and prior builders
+- `Praxis_tutorial.py`: end-to-end transfer-learning tutorial script
+- `praxis_in_serial.py`: sequential multi-layer transfer example
+- `Praxis_BGM_Tutorial.ipynb`: notebook walkthrough
 
 ## Installation
 
-Clone the repository and install locally:
+From the repository root:
 
 ```bash
 pip install -e .
 ```
-or install directly from this repo
+
+Or install directly from a local checkout:
 
 ```bash
-pip install git+https://github.com/ContiLab-usc/Praxis-BGM.git
+pip install /path/to/Praxis
 ```
 
-## Requirements
-python >= 3.9
-jax >= 0.4.20
-jaxlib >= 0.4.20
-numpy
-scikit-learn
-matplotlib
+## Repository layout
 
-For GPU acceleration, install the appropriate jaxlib from:
-https://github.com/google/jax#installation
+```text
+Praxis/
+├── LICENSE
+├── README.md
+├── Praxis_BGM_Tutorial.ipynb
+├── Praxis_tutorial.py
+├── praxis_in_serial.py
+├── pyproject.toml
+└── src/
+    └── praxis_bgm/
+        ├── __init__.py
+        ├── core.py
+        ├── prior_utils.py
+        └── utility.py
+```
 
-## Tutorial
+## Quick start
 
-A complete walkthrough of Praxis-BGM is provided in the following notebook:
+```python
+import jax
+import numpy as np
+from praxis_bgm import Praxis_BGM
 
-[Praxis_BGM_Tutorial.ipynb](./Praxis_BGM_Tutorial.ipynb)
+X = np.array(
+    [
+        [-2.0, -1.8],
+        [-1.8, -2.1],
+        [1.9, 2.0],
+        [2.1, 1.8],
+    ],
+    dtype=np.float32,
+)
 
-This tutorial demonstrates the basic workflow, including simulation of overlapping GMM data, construction of source → target domain shift, empirical source priors, NGVI-based clustering with transferred priors, and benchmarking against QDA and unsupervised baselines using ARI.
+model = Praxis_BGM(
+    rng_key=jax.random.PRNGKey(0),
+    K=2,
+    beta=1e-3,
+    num_samples=8,
+    elbo_eval_freq=1,
+    verbose=True,
+)
 
-## Citation
+model.fit(X, num_iters=10, batch_size=4)
+assignments, weights = model.predict(X)
+posterior_mus, posterior_covs, posterior_pis, responsibilities = model.get_posteriors(X)
+```
 
-If you use Praxis-BGM in your research, please cite:
+## Main model arguments
 
-@article{jia2025praxisbgm,
-  title={Clustering of Omic Data Using Semi-Supervised Transfer Learning for Gaussian Mixture Models via Natural-Gradient Variational Inference},
-  author={Jia, Qiran and Goodrich, Jesse A. and Conti, David V.},
-  journal={bioRxiv},
-  year={2025},
-  doi={10.1101/2025.11.13.688299},
-}
+- `K`: number of mixture components
+- `prior_mus`, `prior_Sigmas`, `prior_weights`: optional transferred priors
+- `init_mus`, `init_covs`, `init_pis`: optional variational initialization
+- `beta`: step size for mean and weight updates
+- `rho_prec`: damping for covariance / precision updates
+- `rho_mu`: damping for mean updates
+- `num_samples`: number of anchor samples used per NGVI update
+- `data_precision_int`: optional scalar observation precision override
+- `likelihood_temp`: scaling on the minibatch likelihood term
+- `sparse_A` / `cluster_A`: optional structural masks
+- `freeze_A_zeros`: keep zero-masked covariance entries fixed during training
+
+## Tutorials
+
+- Script walkthrough: [Praxis_tutorial.py](./Praxis_tutorial.py)
+- Notebook walkthrough: [Praxis_BGM_Tutorial.ipynb](./Praxis_BGM_Tutorial.ipynb)
+- Sequential multi-omics example: [praxis_in_serial.py](./praxis_in_serial.py)
+
+## Notes
+
+- The package requires Python 3.9+.
+- JAX is used for the core optimization and Monte Carlo ELBO evaluation.
+- This layout is intended to replace the older `Praxis-BGM` repo structure while
+  preserving the newer damped global-z-prior implementation from `Praxis/`.

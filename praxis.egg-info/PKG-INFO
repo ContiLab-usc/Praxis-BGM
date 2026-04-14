@@ -1,0 +1,127 @@
+Metadata-Version: 2.1
+Name: praxis
+Version: 0.1.0
+Summary: Praxis: damped global-z-prior Bayesian Gaussian mixture library
+Author-email: Qiran Jia <you@example.com>
+Requires-Python: >=3.9
+Description-Content-Type: text/markdown
+Requires-Dist: jax
+Requires-Dist: jaxlib
+Requires-Dist: numpy
+Requires-Dist: scikit-learn
+Requires-Dist: matplotlib
+
+# Praxis
+
+`Praxis` is a packaged version of the updated damped global-z-prior Praxis-BGM
+algorithm. It reorganizes the functionality from
+`Praxis_BGM_global_z_prior_damped.py` into a reusable Python library with:
+
+- a user-facing model class in `core.py`
+- numerical utilities and update routines in `utility.py`
+- package metadata in `pyproject.toml`
+
+The main entry point is `Praxis.Praxis_BGM`.
+
+## Installation
+
+From the repository root:
+
+```bash
+pip install ./Praxis
+```
+
+For editable local development:
+
+```bash
+pip install -e ./Praxis
+```
+
+## Package Layout
+
+```text
+Praxis/
+├── __init__.py
+├── core.py
+├── utility.py
+├── pyproject.toml
+└── README.md
+```
+
+## Quick Start
+
+```python
+import jax
+import numpy as np
+from Praxis import Praxis_BGM
+
+X = np.array(
+    [
+        [-2.0, -1.8],
+        [-1.8, -2.1],
+        [1.9, 2.0],
+        [2.1, 1.8],
+    ],
+    dtype=np.float32,
+)
+
+model = Praxis_BGM(
+    rng_key=jax.random.PRNGKey(0),
+    K=2,
+    verbose=True,
+    num_samples=8,
+    elbo_eval_freq=1,
+)
+
+model.fit(X, num_iters=10, batch_size=4)
+
+posterior_mus, posterior_covs, posterior_pis, responsibilities = model.get_posteriors(X)
+assignments, weights = model.predict(X)
+summary = model.get_model_summary()
+```
+
+## Main Hyperparameters
+
+These are the most important arguments on `Praxis_BGM(...)`:
+
+- `K`: number of mixture components
+- `beta`: base step size for mean and mixture-weight updates
+- `rho_prec`: damping strength for precision/covariance updates
+- `rho_mu`: damping strength for mean updates
+- `num_samples`: number of anchor samples used in each Monte Carlo update
+- `elbo_eval_freq`: how often to evaluate the Monte Carlo ELBO
+- `data_precision_int`: optional fixed scalar observation precision; if omitted,
+  Praxis estimates a diagonal precision from the data
+- `likelihood_temp`: global scaling factor on the likelihood term
+- `sparse_A` / `cluster_A`: optional structural masks
+- `freeze_A_zeros`: whether zero-valued mask entries should remain zero during
+  training
+
+## Priors and Initialization
+
+The model supports optional prior and initialization inputs:
+
+- `prior_mus`, `prior_Sigmas`, `prior_weights`: prior mixture over latent
+  anchors
+- `init_mus`, `init_covs`, `init_pis`: direct initialization of the
+  variational mixture
+
+If priors are not supplied, the model falls back to Bayesian Gaussian Mixture
+initialization and empirical covariance heuristics.
+
+## Main Methods
+
+- `fit(data, num_iters=..., batch_size=..., early_stop=..., patience=...)`
+- `get_posteriors(data)`
+- `predict(data)`
+- `BF_selection(data, top_n=20, visual=False)`
+- `get_model_summary()`
+- `get_params()`
+
+## Notes
+
+- Input data should be a numeric matrix with shape `(N, d)`.
+- The implementation uses JAX for numerical computation and Monte Carlo updates.
+- The packaged code preserves the damped algorithm behavior of
+  `Praxis_BGM_global_z_prior_damped.py` while making it easier to test,
+  install, and reuse in other scripts or wrappers.

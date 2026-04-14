@@ -1,0 +1,10 @@
+README.md
+pyproject.toml
+./__init__.py
+./core.py
+./utility.py
+praxis.egg-info/PKG-INFO
+praxis.egg-info/SOURCES.txt
+praxis.egg-info/dependency_links.txt
+praxis.egg-info/requires.txt
+praxis.egg-info/top_level.txt

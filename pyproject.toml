@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "praxis-bgm"
-version = "0.1.0"
-description = "Praxis-BGM: Prior-augmented Bayesian Gaussian Mixture with NGVI and structural precision/covariance masks"
+version = "0.2.0"
+description = "Praxis-BGM: packaged damped global-z-prior Bayesian Gaussian mixture library"
 authors = [
   { name = "Qiran Jia", email = "you@example.com" }
 ]
@@ -15,12 +15,14 @@ dependencies = [
   "jax",
   "jaxlib",
   "numpy",
+  "pandas",
   "scikit-learn",
   "matplotlib",
 ]
 
 [project.urls]
-Homepage = "https://github.com/yourname/praxis-bgm"
+Homepage = "https://github.com/ContiLab-usc/Praxis-BGM"
+Repository = "https://github.com/ContiLab-usc/Praxis-BGM"
 
 [tool.setuptools]
 package-dir = {"" = "src"}

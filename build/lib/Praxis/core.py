@@ -9,7 +9,6 @@ selection.
 
 import jax
 import jax.numpy as jnp
-from jax import vmap
 from jax.random import choice, split
 from sklearn.covariance import EmpiricalCovariance, OAS
 from sklearn.mixture import BayesianGaussianMixture
