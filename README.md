@@ -33,7 +33,7 @@ pip install -e .
 Or install directly from a local checkout:
 
 ```bash
-pip install /path/to/Praxis
+pip install git+https://github.com/ContiLab-usc/Praxis-BGM.git
 ```
 
 ## Repository layout
