@@ -25,7 +25,6 @@ from praxis_bgm import Praxis_BGM
 - `src/praxis_bgm/utility.py`: numerical helpers and damped NGVI updates
 - `src/praxis_bgm/prior_utils.py`: source-to-target alignment and prior builders
 - `Praxis_tutorial.py`: end-to-end transfer-learning tutorial script
-- `praxis_in_serial.py`: sequential multi-layer transfer example
 - `Praxis_BGM_Tutorial.ipynb`: notebook walkthrough
 
 ## Installation
