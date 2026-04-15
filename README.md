@@ -1,6 +1,6 @@
 # Praxis-BGM
 A Prior-Augmented Bayesian Gaussian Mixture Model via Natural-Gradient Variational Inference, is a semi-supervised transfer-learning framework for clustering high-dimensional omics, multi-omics, and single-cell data using Bayesian Gaussian Mixture Models with Natural-Gradient Variational Inference.
-![Praxis-BGM overview](./visual_abstract.pdf)
+![Praxis-BGM overview](./visual_abstract.png)
 ## Updated installable layout for the latest Praxis algorithm
 
 This folder packages the newest `Praxis` algorithm in the installable
