@@ -20,12 +20,12 @@ import jax
 import numpy as np
 from jax.random import PRNGKey, split
 from sklearn.metrics import adjusted_rand_score
-
+'''
 REPO_ROOT = Path(__file__).resolve().parent
 SRC_ROOT = REPO_ROOT / "src"
 if str(SRC_ROOT) not in sys.path:
     sys.path.insert(0, str(SRC_ROOT))
-
+'''
 from praxis_bgm import Praxis_BGM
 
 
