@@ -126,7 +126,6 @@ print("Responsibilities:\n", responsibilities)
 
 - Script walkthrough: [Praxis_tutorial.py](./Praxis_tutorial.py)
 - Notebook walkthrough: [Praxis_BGM_Tutorial.ipynb](./Praxis_BGM_Tutorial.ipynb)
-- Sequential multi-omics example: [praxis_in_serial.py](./praxis_in_serial.py)
 
 ## Notes
 
