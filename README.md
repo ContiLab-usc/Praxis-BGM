@@ -64,10 +64,18 @@ from praxis_bgm import Praxis_BGM
 
 X = np.array(
     [
-        [-2.0, -1.8],
-        [-1.8, -2.1],
-        [1.9, 2.0],
-        [2.1, 1.8],
+        [-2.2, -1.8],
+        [-1.8, -2.3],
+        [1.7, 2.5],
+        [2.3, 1.8],
+    ],
+    dtype=np.float32,
+)
+
+prior_mus = np.array(
+    [
+        [-2.0, -2.0],
+        [2.0, 2.0],
     ],
     dtype=np.float32,
 )
@@ -75,15 +83,24 @@ X = np.array(
 model = Praxis_BGM(
     rng_key=jax.random.PRNGKey(0),
     K=2,
+    prior_mus=prior_mus,
     beta=1e-3,
     num_samples=8,
     elbo_eval_freq=1,
     verbose=True,
 )
 
-model.fit(X, num_iters=10, batch_size=4)
+model.fit(X, num_iters=200, batch_size=4)
+
 assignments, weights = model.predict(X)
 posterior_mus, posterior_covs, posterior_pis, responsibilities = model.get_posteriors(X)
+
+print("Assignments:", assignments)
+print("Weights:", weights)
+print("Posterior means:\n", posterior_mus)
+print("Posterior covariances:\n", posterior_covs)
+print("Posterior mixture weights:", posterior_pis)
+print("Responsibilities:\n", responsibilities)
 ```
 
 ## Main model arguments
