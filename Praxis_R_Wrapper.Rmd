@@ -1,0 +1,274 @@
+---
+title: "Praxis-BGM R Wrapper"
+author: "Qiran Jia"
+date: "2026-04-16"
+output:
+  html_document: default
+---
+
+## Overview
+
+This document shows how to call the updated Python `praxis_bgm` package from R
+with `reticulate`. It is written for the current installable API:
+
+- Python package: `praxis_bgm`
+- Main class: `praxis_bgm.Praxis_BGM`
+- Assumed environment: `Praxis_env`
+
+Compared with the older wrapper, the updated Python API now uses:
+
+- `prior_weights` instead of `prior_pis`
+- `init_pis` for initialization weights
+- `freeze_A_zeros` instead of the older mask-enforcement arguments
+- additional runtime controls such as `data_precision_int`,
+  `likelihood_temp`, `rho_prec`, `rho_mu`, and `elbo_eval_freq`
+
+## Setup
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(comment = "#>", collapse = TRUE)
+
+library(reticulate)
+
+use_condaenv("Praxis_env", required = TRUE)
+```
+
+```{r py-config}
+py_config()
+```
+
+## R Wrapper
+
+```{r wrapper}
+praxis_bgm_fit <- function(
+  data,
+  K,
+  seed = 0L,
+  prior_mus = NULL,
+  prior_Sigmas = NULL,
+  prior_weights = NULL,
+  init_mus = NULL,
+  init_covs = NULL,
+  init_pis = NULL,
+  beta = 1e-3,
+  tol = 1e-4,
+  max_iters = 1000L,
+  verbose = TRUE,
+  sparse_A = NULL,
+  cluster_A = NULL,
+  freeze_A_zeros = FALSE,
+  prior_mus_variance = 1.0,
+  num_samples = 100L,
+  data_precision_int = NULL,
+  likelihood_temp = 1.0,
+  rho_prec = 0.05,
+  rho_mu = 1.0,
+  elbo_eval_freq = 10L,
+  num_iters = 50L,
+  batch_size = NULL,
+  early_stop = FALSE,
+  patience = 2L
+) {
+  if (!reticulate::py_module_available("praxis_bgm")) {
+    stop("The Python module `praxis_bgm` is not available in `Praxis_env`.")
+  }
+  if (!reticulate::py_module_available("jax")) {
+    stop("The Python module `jax` is not available in `Praxis_env`.")
+  }
+  if (missing(data)) {
+    stop("`data` is required and must be a numeric matrix or data frame.")
+  }
+  if (!is.numeric(K) || length(K) != 1L || is.na(K) || K < 2 || K != as.integer(K)) {
+    stop("`K` must be a single integer greater than or equal to 2.")
+  }
+
+  data_matrix <- if (is.data.frame(data)) {
+    data.matrix(data)
+  } else {
+    as.matrix(data)
+  }
+
+  if (!is.matrix(data_matrix) || length(dim(data_matrix)) != 2L) {
+    stop("`data` must be a two-dimensional matrix or data frame.")
+  }
+  if (!is.numeric(data_matrix)) {
+    stop("`data` must contain numeric values.")
+  }
+  if (any(!is.finite(data_matrix))) {
+    stop("`data` must contain only finite values.")
+  }
+
+  n_obs <- nrow(data_matrix)
+  if (is.null(batch_size)) {
+    batch_size <- min(50L, n_obs)
+  }
+  if (!is.numeric(batch_size) || length(batch_size) != 1L || batch_size < 1) {
+    stop("`batch_size` must be a positive integer.")
+  }
+  if (batch_size > n_obs) {
+    stop("`batch_size` cannot exceed the number of rows in `data`.")
+  }
+
+  np <- reticulate::import("numpy", delay_load = TRUE, convert = FALSE)
+  jax <- reticulate::import("jax", delay_load = TRUE, convert = FALSE)
+  praxis <- reticulate::import("praxis_bgm", delay_load = TRUE, convert = FALSE)
+
+  as_numpy <- function(x, dtype = "float32") {
+    if (is.null(x)) {
+      return(NULL)
+    }
+    if (inherits(x, "python.builtin.object")) {
+      return(x)
+    }
+    np$array(x, dtype = dtype)
+  }
+
+  py_array_to_r <- function(x) {
+    if (is.null(x)) {
+      return(NULL)
+    }
+    reticulate::py_to_r(np$asarray(x))
+  }
+
+  rng_key <- jax$random$PRNGKey(as.integer(seed))
+
+  model <- praxis$Praxis_BGM(
+    rng_key = rng_key,
+    K = as.integer(K),
+    prior_mus = as_numpy(prior_mus),
+    prior_Sigmas = as_numpy(prior_Sigmas),
+    prior_weights = as_numpy(prior_weights),
+    init_mus = as_numpy(init_mus),
+    init_covs = as_numpy(init_covs),
+    init_pis = as_numpy(init_pis),
+    beta = as.numeric(beta),
+    tol = as.numeric(tol),
+    max_iters = as.integer(max_iters),
+    verbose = isTRUE(verbose),
+    sparse_A = as_numpy(sparse_A),
+    cluster_A = as_numpy(cluster_A),
+    freeze_A_zeros = isTRUE(freeze_A_zeros),
+    prior_mus_variance = as.numeric(prior_mus_variance),
+    num_samples = as.integer(num_samples),
+    data_precision_int = if (is.null(data_precision_int)) NULL else as.integer(data_precision_int),
+    likelihood_temp = as.numeric(likelihood_temp),
+    rho_prec = as.numeric(rho_prec),
+    rho_mu = as.numeric(rho_mu),
+    elbo_eval_freq = as.integer(elbo_eval_freq)
+  )
+
+  model$fit(
+    as_numpy(data_matrix),
+    num_iters = as.integer(num_iters),
+    batch_size = as.integer(batch_size),
+    early_stop = isTRUE(early_stop),
+    patience = as.integer(patience)
+  )
+
+  posteriors <- model$get_posteriors(as_numpy(data_matrix))
+  prediction <- model$predict(as_numpy(data_matrix))
+
+  posterior_mus <- py_array_to_r(posteriors[[0]])
+  posterior_covs <- py_array_to_r(posteriors[[1]])
+  posterior_pis <- py_array_to_r(posteriors[[2]])
+  responsibilities <- py_array_to_r(posteriors[[3]])
+
+  assignments_zero_based <- reticulate::py_to_r(prediction[[0]])
+  learned_weights <- reticulate::py_to_r(prediction[[1]])
+  assignments <- as.integer(assignments_zero_based) + 1L
+
+  list(
+    assignments = assignments,
+    assignments_zero_based = assignments_zero_based,
+    learned_weights = learned_weights,
+    posterior_mus = posterior_mus,
+    posterior_covs = posterior_covs,
+    posterior_pis = posterior_pis,
+    responsibilities = responsibilities,
+    model_summary = reticulate::py_to_r(model$get_model_summary()),
+    elbo_history = reticulate::py_to_r(model$elbo_history),
+    model = model
+  )
+}
+```
+
+## Self-contained Example
+
+```{r example-data}
+set.seed(123)
+
+n_per_cluster <- 40
+
+cluster_1 <- cbind(
+  rnorm(n_per_cluster, mean = -2.0, sd = 0.45),
+  rnorm(n_per_cluster, mean = -1.8, sd = 0.50)
+)
+
+cluster_2 <- cbind(
+  rnorm(n_per_cluster, mean = 2.1, sd = 0.50),
+  rnorm(n_per_cluster, mean = 1.9, sd = 0.45)
+)
+
+X <- rbind(cluster_1, cluster_2)
+colnames(X) <- c("feature_1", "feature_2")
+
+prior_mus <- rbind(
+  c(-1.9, -1.9),
+  c(2.0, 2.0)
+)
+
+prior_Sigmas <- array(0, dim = c(2, 2, 2))
+prior_Sigmas[1, , ] <- diag(c(1.0, 1.0))
+prior_Sigmas[2, , ] <- diag(c(1.0, 1.0))
+
+true_labels <- c(rep(1L, n_per_cluster), rep(2L, n_per_cluster))
+```
+
+```{r example-fit}
+fit <- praxis_bgm_fit(
+  data = X,
+  K = 2L,
+  seed = 42L,
+  prior_mus = prior_mus,
+  prior_Sigmas = prior_Sigmas,
+  prior_weights = c(0.5, 0.5),
+  beta = 1e-3,
+  tol = 1e-4,
+  max_iters = 60L,
+  num_iters = 8L,
+  batch_size = 40L,
+  num_samples = 8L,
+  data_precision_int = 1L,
+  likelihood_temp = 1.0,
+  rho_prec = 0.08,
+  rho_mu = 1.0,
+  elbo_eval_freq = 1L,
+  early_stop = TRUE,
+  patience = 2L,
+  verbose = FALSE
+)
+```
+
+## Results
+
+```{r results}
+fit$assignments[1:10]
+fit$learned_weights
+fit$model_summary
+tail(fit$elbo_history, 3)
+table(True = true_labels, Predicted = fit$assignments)
+```
+
+## Notes
+
+```{r notes, echo=FALSE}
+cat(
+  paste(
+    "- `assignments` are returned as 1-based cluster labels for R users.",
+    "- `assignments_zero_based` preserves the raw Python labels from `model.predict()`.",
+    "- `posterior_mus`, `posterior_covs`, `posterior_pis`, and `responsibilities` are converted back into R objects.",
+    "- `model` remains a live Python object, so you can still call methods such as `fit$model$BF_selection(...)` through `reticulate`.",
+    sep = "\n"
+  )
+)
+```

@@ -29,6 +29,67 @@ from praxis_bgm import Praxis_BGM
 
 ## Installation
 
+To keep the package, tutorials, and application examples in one place, use a
+dedicated Conda environment named `Praxis_env`.
+
+### Recommended environment
+
+Create and activate the environment:
+
+```bash
+conda create -n Praxis_env python=3.10 -y
+conda activate Praxis_env
+```
+
+Core libraries required for the packaged `praxis_bgm` library and the main
+Python tutorial:
+
+- `jax`
+- `jaxlib`
+- `numpy`
+- `pandas`
+- `scikit-learn`
+- `matplotlib`
+
+Additional libraries required for the scripted `METABRIC_TCGABRCA` example:
+
+- `scipy`
+- `statsmodels`
+- `lifelines`
+
+Additional libraries required for the notebook-based
+`Pancreas_scRNA_label_transfer` example:
+
+- `anndata`
+- `scanpy`
+- `scvi-tools`
+- `scrublet`
+- `bbknn`
+- `scanorama`
+- `jupyterlab`
+- `ipykernel`
+
+Optional R-side libraries for `Praxis_R_Wrapper.Rmd`:
+
+- `reticulate`
+- `rmarkdown`
+- `knitr`
+
+One practical way to provision `Praxis_env` is:
+
+```bash
+conda create -n Praxis_env python=3.10 -y
+conda activate Praxis_env
+pip install -e .
+pip install scipy statsmodels lifelines anndata scanpy scvi-tools scrublet bbknn scanorama jupyterlab ipykernel
+```
+
+If you also want to render the R wrapper from the same Conda environment, add:
+
+```bash
+conda install -n Praxis_env -c conda-forge r-base r-reticulate r-rmarkdown r-knitr -y
+```
+
 From the repository root:
 
 ```bash
@@ -125,6 +186,63 @@ print("Responsibilities:\n", responsibilities)
 
 - Script walkthrough: [Praxis_tutorial.py](./Praxis_tutorial.py)
 - Notebook walkthrough: [Praxis_BGM_Tutorial.ipynb](./Praxis_BGM_Tutorial.ipynb)
+- Application example: [applications/METABRIC_TCGABRCA/README.md](./applications/METABRIC_TCGABRCA/README.md)
+- Application example: [applications/Pancreas_scRNA_label_transfer/README.md](./applications/Pancreas_scRNA_label_transfer/README.md)
+
+## Application examples
+
+The repository includes multiple real-data application workflows under
+`applications/`. These are the best entry points when you want a practical
+analysis example rather than a minimal synthetic tutorial.
+
+### METABRIC_TCGABRCA
+
+This is a self-contained transfer-learning workflow for the METABRIC-to-TCGA
+breast cancer subtype analysis.
+
+Use it when you want to:
+
+- run the installed `praxis_bgm` package on a real omics dataset
+- reproduce the legacy subtype transfer workflow with the current software
+- benchmark `Praxis` against `BGM` on the same target cohort
+- generate subtype association metrics, cluster assignments, and 5-year Cox survival outputs
+
+The application folder already contains the required `1000gene` input files in
+`applications/METABRIC_TCGABRCA/data/`, so the default run is self-contained.
+
+Typical usage:
+
+```bash
+conda activate Praxis_env
+python applications/METABRIC_TCGABRCA/run_metabric_tcga_subtype_sup.py --gene-suffix 1000gene
+```
+
+Main outputs are written to `applications/METABRIC_TCGABRCA/output/1000gene/`.
+
+### Pancreas_scRNA_label_transfer
+
+This application contains a notebook-based single-cell label transfer workflow
+for the human pancreas benchmark dataset.
+
+Use it when you want to:
+
+- study a label-transfer use case in single-cell RNA-seq data
+- compare Praxis-BGM against ingest, BBKNN, Scanorama, ComBat, scVI, and scANVI-style workflows
+- inspect notebook-driven figures such as UMAPs, confusion heatmaps, and classification reports
+
+The application folder includes:
+
+- `Praxis_BGM_label_transfer_snRNA_seq_pancreas.ipynb`
+- `human_pancreas_norm_complexBatch.h5ad`
+
+The pancreas example is notebook-first and still contains some Colab and
+Google Drive output paths, so it is best treated as an analysis template that
+you can adapt to your own local output directory. The new application README
+for that folder explains the workflow structure and the main outputs to look
+for.
+
+For step-by-step usage details, inputs, outputs, and interpretation guidance,
+see the application READMEs linked above.
 
 ## Notes
 
