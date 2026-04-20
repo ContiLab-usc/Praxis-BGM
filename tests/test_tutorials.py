@@ -2,8 +2,9 @@ import numpy as np
 import pytest
 
 import Praxis_tutorial as tutorial_module
-import praxis_in_serial as serial_module
 import praxis_bgm.core as praxis_core
+
+serial_module = pytest.importorskip("praxis_in_serial")
 
 
 class _DummyBGM:

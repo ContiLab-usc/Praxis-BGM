@@ -71,7 +71,6 @@ Praxis/
 ├── README.md
 ├── Praxis_BGM_Tutorial.ipynb
 ├── Praxis_tutorial.py
-├── praxis_in_serial.py
 ├── pyproject.toml
 └── src/
     └── praxis_bgm/
