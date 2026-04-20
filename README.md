@@ -28,7 +28,7 @@ from praxis_bgm import Praxis_BGM
 - `Praxis_BGM_Tutorial.ipynb`: notebook walkthrough
 
 ### Recommended environment
-To keep the package, tutorials, and application examples in one place, use a
+To keep the package and tutorials in one place, use a
 dedicated Conda environment named `Praxis_env`.
 
 Create and activate the environment:
@@ -134,11 +134,7 @@ print("Responsibilities:\n", responsibilities)
 - `prior_mus`, `prior_Sigmas`, `prior_weights`: optional transferred priors
 - `init_mus`, `init_covs`, `init_pis`: optional variational initialization
 - `beta`: step size for mean and weight updates
-- `rho_prec`: damping for covariance / precision updates
-- `rho_mu`: damping for mean updates
 - `num_samples`: number of anchor samples used per NGVI update
-- `data_precision_int`: optional scalar observation precision override
-- `likelihood_temp`: scaling on the minibatch likelihood term
 - `sparse_A` / `cluster_A`: optional structural masks
 
 
