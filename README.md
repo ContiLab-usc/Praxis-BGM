@@ -28,11 +28,22 @@ from praxis_bgm import Praxis_BGM
 - `Praxis_BGM_Tutorial.ipynb`: notebook walkthrough
 
 ## Installation
+From the repository root:
 
-To keep the package, tutorials, and application examples in one place, use a
-dedicated Conda environment named `Praxis_env`.
+```bash
+pip install -e .
+```
+
+Or install directly from a local checkout:
+
+```bash
+pip install git+https://github.com/ContiLab-usc/Praxis-BGM.git
+```
+
 
 ### Recommended environment
+To keep the package, tutorials, and application examples in one place, use a
+dedicated Conda environment named `Praxis_env`.
 
 Create and activate the environment:
 
@@ -88,18 +99,6 @@ If you also want to render the R wrapper from the same Conda environment, add:
 
 ```bash
 conda install -n Praxis_env -c conda-forge r-base r-reticulate r-rmarkdown r-knitr -y
-```
-
-From the repository root:
-
-```bash
-pip install -e .
-```
-
-Or install directly from a local checkout:
-
-```bash
-pip install git+https://github.com/ContiLab-usc/Praxis-BGM.git
 ```
 
 ## Repository layout
