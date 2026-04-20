@@ -148,5 +148,4 @@ print("Responsibilities:\n", responsibilities)
 
 - The package requires Python 3.9+.
 - JAX is used for the core optimization and Monte Carlo ELBO evaluation.
-- This layout is intended to replace the older `Praxis-BGM` repo structure while
-  preserving the newer damped global-z-prior implementation from `Praxis/`.
+
