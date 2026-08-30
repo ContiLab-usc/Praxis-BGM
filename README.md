@@ -144,6 +144,64 @@ print("Responsibilities:\n", responsibilities)
 - Notebook walkthrough: [Praxis_BGM_Tutorial.ipynb](./Praxis_BGM_Tutorial.ipynb)
 
 
+## R interface
+
+An R wrapper is maintained in a separate repository for users who prefer to run
+Praxis-BGM from R:
+
+**https://github.com/BruceResearch/Praxis_BGM_R_interface**
+
+The wrapper does not reimplement the model. It calls this Python/JAX package
+directly through [`reticulate`](https://rstudio.github.io/reticulate/), so you
+still need a working Python install of `praxis_bgm` (see
+[Installation](#installation) above). The R side adds convenience functions such
+as `praxis_bgm_fit()` and `praxis_bgm_bf_selection()`, and returns results with
+both R-friendly (1-based) and Python (0-based) indexing.
+
+### Setup
+
+1. Create the Python environment and install this package:
+
+   ```bash
+   conda create -n Praxis_env python=3.10 -y
+   conda activate Praxis_env
+   pip install jax jaxlib numpy scikit-learn matplotlib
+   pip install git+https://github.com/ContiLab-usc/Praxis-BGM.git
+   ```
+
+2. Install the required R packages: `reticulate`, `MASS`, `proxy`, `clue`.
+
+3. Clone the R interface repo and point `reticulate` at the Conda environment:
+
+   ```r
+   library(reticulate)
+   use_condaenv("Praxis_env", required = TRUE)
+   source("R/praxis_bgm_interface.R")
+   ```
+
+### Basic usage
+
+```r
+fit <- praxis_bgm_fit(
+  data = your_matrix,
+  K = 3,
+  seed = 123,
+  prior_weights = c(1/3, 1/3, 1/3),
+  num_iters = 50,
+  batch_size = min(50, nrow(your_matrix))
+)
+
+bf <- praxis_bgm_bf_selection(
+  model = fit,
+  data = your_matrix,
+  top_n = 20
+)
+```
+
+See the R interface repository's README for the full argument reference and a
+worked example. A local R Markdown walkthrough is also included here in
+[Praxis_R_Wrapper.Rmd](./Praxis_R_Wrapper.Rmd).
+
 ## Notes
 
 - The package requires Python 3.9+.
