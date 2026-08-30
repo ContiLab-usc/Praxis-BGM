@@ -149,3 +149,24 @@ print("Responsibilities:\n", responsibilities)
 - The package requires Python 3.9+.
 - JAX is used for the core optimization and Monte Carlo ELBO evaluation.
 
+## Citation
+
+If you use Praxis-BGM in your research, please cite:
+
+> **Qiran Jia, Jesse A. Goodrich, David V. Conti.**
+> *Praxis-BGM: clustering of omics data using semi-supervised transfer learning for Gaussian mixture models via natural-gradient variational inference.*
+> Bioinformatics, 42(6):btag395, 2026. doi:10.1093/bioinformatics/btag395
+
+```bibtex
+@article{jia2026praxisbgm,
+  title={Praxis-BGM: clustering of omics data using semi-supervised transfer learning for Gaussian mixture models via natural-gradient variational inference},
+  author={Jia, Qiran and Goodrich, Jesse A. and Conti, David V.},
+  journal={Bioinformatics},
+  volume={42},
+  number={6},
+  pages={btag395},
+  year={2026},
+  doi={10.1093/bioinformatics/btag395}
+}
+```
+
