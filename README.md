@@ -154,9 +154,13 @@ Praxis-BGM from R:
 The wrapper does not reimplement the model. It calls this Python/JAX package
 directly through [`reticulate`](https://rstudio.github.io/reticulate/), so you
 still need a working Python install of `praxis_bgm` (see
-[Installation](#installation) above). The R side adds convenience functions such
-as `praxis_bgm_fit()` and `praxis_bgm_bf_selection()`, and returns results with
-both R-friendly (1-based) and Python (0-based) indexing.
+[Installation](#installation) above). All wrapper logic lives in a single
+source-of-truth script, `R/praxis_bgm_interface.R`, which exposes
+`praxis_bgm_fit()`, `praxis_bgm_bf_selection()`, and the simulation helpers used
+by its tutorials. Its argument names track the current Python API
+(`prior_weights`, `init_pis`, `freeze_A_zeros`, `data_precision_int`,
+`likelihood_temp`, `rho_prec`, `rho_mu`, `elbo_eval_freq`, ...), and results are
+returned with both R-friendly (1-based) and raw Python (0-based) indexing.
 
 ### Setup
 
@@ -169,13 +173,22 @@ both R-friendly (1-based) and Python (0-based) indexing.
    pip install git+https://github.com/ContiLab-usc/Praxis-BGM.git
    ```
 
-2. Install the required R packages: `reticulate`, `MASS`, `proxy`, `clue`.
+2. Install the required R packages: `reticulate`, `MASS`, `proxy`, `clue`
+   (`mclust` and `rmarkdown` are suggested for the tutorials).
 
-3. Clone the R interface repo and point `reticulate` at the Conda environment:
+3. Clone the R interface repo, point `reticulate` at the environment, and source
+   the wrapper script:
 
    ```r
    library(reticulate)
-   use_condaenv("Praxis_env", required = TRUE)
+
+   praxis_python <- Sys.getenv("RETICULATE_PYTHON", unset = "")
+   if (nzchar(praxis_python)) {
+     use_python(praxis_python, required = TRUE)
+   } else {
+     use_condaenv("Praxis_env", required = TRUE)
+   }
+
    source("R/praxis_bgm_interface.R")
    ```
 
@@ -188,19 +201,25 @@ fit <- praxis_bgm_fit(
   seed = 123,
   prior_weights = c(1/3, 1/3, 1/3),
   num_iters = 50,
-  batch_size = min(50, nrow(your_matrix))
+  batch_size = min(50, nrow(your_matrix)),
+  verbose = FALSE
 )
+# fit$assignments (1-based), fit$assignments_zero_based, fit$learned_weights,
+# fit$posterior_mus / posterior_covs / posterior_pis, fit$elbo_history, fit$model
 
 bf <- praxis_bgm_bf_selection(
   model = fit,
   data = your_matrix,
-  top_n = 20
+  top_n = 20,
+  visual = FALSE
 )
+# bf$top_features (1-based), bf$top_features_zero_based, bf$classification
 ```
 
-See the R interface repository's README for the full argument reference and a
-worked example. A local R Markdown walkthrough is also included here in
-[Praxis_R_Wrapper.Rmd](./Praxis_R_Wrapper.Rmd).
+See the R interface repository's README, `Praxis_R_Wrapper.Rmd` (compact
+example), and `Praxis_R_Tutorial.Rmd` (end-to-end walkthrough with transferred
+priors) for the full argument reference. A copy of the wrapper walkthrough is
+also included here as [Praxis_R_Wrapper.Rmd](./Praxis_R_Wrapper.Rmd).
 
 ## Notes
 
